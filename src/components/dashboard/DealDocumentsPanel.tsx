@@ -356,7 +356,7 @@ export default function DealDocumentsPanel({ deal, onClose }: DealDocumentsPanel
           </div>
 
           {/* Category tabs */}
-          <div className="relative flex items-center gap-1">
+          <div className="relative flex items-center gap-1 px-1">
             {/* Left scroll button */}
             <button
               onClick={() => scrollCategoryTabs('left')}
@@ -368,7 +368,7 @@ export default function DealDocumentsPanel({ deal, onClose }: DealDocumentsPanel
             {/* Scrollable tabs */}
             <div
               ref={categoryTabsRef}
-              className="flex items-center gap-2 py-1"
+              className="flex items-center gap-2 py-3 px-1"
               style={{ overflowX: 'auto', overflowY: 'visible', scrollbarWidth: 'none', msOverflowStyle: 'none', flex: 1 }}
             >
               <button
@@ -399,7 +399,7 @@ export default function DealDocumentsPanel({ deal, onClose }: DealDocumentsPanel
                       <span>{cfg.label}</span>
                     </button>
                     {catMissing > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-[#EF4444] text-white text-[9px] font-bold flex items-center justify-center px-1 z-10 shadow-sm">
+                      <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] rounded-full bg-[#EF4444] text-white text-[10px] font-bold flex items-center justify-center px-1 z-10 shadow-sm leading-none">
                         {catMissing}
                       </span>
                     )}
