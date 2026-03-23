@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import {
   Upload, FileText, CheckCircle2, XCircle, Clock, AlertTriangle,
   Globe, User, Home, Landmark, X, Trash2,
-  FileImage, FileSpreadsheet, File, Info, RefreshCw, ChevronRight
+  FileImage, FileSpreadsheet, File, Info, RefreshCw, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import type { Participant, Deal } from '@/lib/mock-data';
 
@@ -157,6 +157,13 @@ export default function DealDocumentsPanel({ deal, onClose }: DealDocumentsPanel
   const [originModal, setOriginModal] = useState<{ docId: string; origin: DocOrigin } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingUploadDocId, setPendingUploadDocId] = useState<string | null>(null);
+  const categoryTabsRef = useRef<HTMLDivElement>(null);
+
+  const scrollCategoryTabs = (dir: 'left' | 'right') => {
+    if (categoryTabsRef.current) {
+      categoryTabsRef.current.scrollBy({ left: dir === 'right' ? 120 : -120, behavior: 'smooth' });
+    }
+  };
 
   const participant = deal.participants.find(p => p.id === selectedParticipantId);
 
@@ -349,42 +356,65 @@ export default function DealDocumentsPanel({ deal, onClose }: DealDocumentsPanel
           </div>
 
           {/* Category tabs */}
-          <div className="flex items-center gap-2 pt-1 pb-0.5" style={{ overflowX: 'auto', overflowY: 'visible', scrollbarWidth: 'none' }}>
+          <div className="relative flex items-center gap-1">
+            {/* Left scroll button */}
             <button
-              onClick={() => setSelectedCategory('all')}
-              className={`flex items-center gap-1 px-3 h-7 rounded-lg text-xs font-semibold transition-colors flex-shrink-0 ${
-                selectedCategory === 'all' ? 'bg-[#0F1B2D] text-white' : 'bg-[#F7F8FA] text-[#64748B] hover:bg-[#F1F5F9]'
-              }`}
+              onClick={() => scrollCategoryTabs('left')}
+              className="flex-shrink-0 w-6 h-7 flex items-center justify-center rounded-lg bg-[#F7F8FA] border border-[#E8ECF0] hover:bg-[#E8ECF0] transition-colors z-10"
             >
-              Todos
-              <span className={`text-[9px] px-1 rounded ${selectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-[#E8ECF0] text-[#64748B]'}`}>
-                {participantDocs.length}
-              </span>
+              <ChevronLeft className="w-3.5 h-3.5 text-[#64748B]" />
             </button>
-            {(['identity', 'financial', 'property', 'loan'] as DocCategory[]).map(cat => {
-              const cfg = CATEGORY_CONFIG[cat];
-              const catDocs = participantDocs.filter(d => d.category === cat);
-              if (catDocs.length === 0) return null;
-              const catMissing = catDocs.filter(d => d.status === 'missing').length;
-              const isActive = selectedCategory === cat;
-              return (
-                <div key={cat} className="relative flex-shrink-0 mt-1 mr-1">
-                  <button
-                    onClick={() => setSelectedCategory(cat)}
-                    className="flex items-center gap-1 px-3 h-7 rounded-lg text-xs font-semibold transition-colors"
-                    style={isActive ? { backgroundColor: cfg.color, color: 'white' } : { backgroundColor: cfg.bg, color: cfg.color }}
-                  >
-                    {cfg.icon}
-                    <span>{cfg.label}</span>
-                  </button>
-                  {catMissing > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] rounded-full bg-[#EF4444] text-white text-[9px] font-bold flex items-center justify-center px-1 z-10 shadow-sm">
-                      {catMissing}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
+
+            {/* Scrollable tabs */}
+            <div
+              ref={categoryTabsRef}
+              className="flex items-center gap-2 py-1"
+              style={{ overflowX: 'auto', overflowY: 'visible', scrollbarWidth: 'none', msOverflowStyle: 'none', flex: 1 }}
+            >
+              <button
+                onClick={() => setSelectedCategory('all')}
+                className={`flex items-center gap-1 px-3 h-7 rounded-lg text-xs font-semibold transition-colors flex-shrink-0 ${
+                  selectedCategory === 'all' ? 'bg-[#0F1B2D] text-white' : 'bg-[#F7F8FA] text-[#64748B] hover:bg-[#F1F5F9]'
+                }`}
+              >
+                Todos
+                <span className={`text-[9px] px-1 rounded ${selectedCategory === 'all' ? 'bg-white/20 text-white' : 'bg-[#E8ECF0] text-[#64748B]'}`}>
+                  {participantDocs.length}
+                </span>
+              </button>
+              {(['identity', 'financial', 'property', 'loan'] as DocCategory[]).map(cat => {
+                const cfg = CATEGORY_CONFIG[cat];
+                const catDocs = participantDocs.filter(d => d.category === cat);
+                if (catDocs.length === 0) return null;
+                const catMissing = catDocs.filter(d => d.status === 'missing').length;
+                const isActive = selectedCategory === cat;
+                return (
+                  <div key={cat} className="relative flex-shrink-0">
+                    <button
+                      onClick={() => setSelectedCategory(cat)}
+                      className="flex items-center gap-1 px-3 h-7 rounded-lg text-xs font-semibold transition-colors"
+                      style={isActive ? { backgroundColor: cfg.color, color: 'white' } : { backgroundColor: cfg.bg, color: cfg.color }}
+                    >
+                      {cfg.icon}
+                      <span>{cfg.label}</span>
+                    </button>
+                    {catMissing > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 rounded-full bg-[#EF4444] text-white text-[9px] font-bold flex items-center justify-center px-1 z-10 shadow-sm">
+                        {catMissing}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right scroll button */}
+            <button
+              onClick={() => scrollCategoryTabs('right')}
+              className="flex-shrink-0 w-6 h-7 flex items-center justify-center rounded-lg bg-[#F7F8FA] border border-[#E8ECF0] hover:bg-[#E8ECF0] transition-colors z-10"
+            >
+              <ChevronRight className="w-3.5 h-3.5 text-[#64748B]" />
+            </button>
           </div>
         </div>
       )}
